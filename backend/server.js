@@ -6,11 +6,22 @@ const fs = require('fs-extra');
 const archiver = require('archiver');
 const tmp = require('tmp-promise');
 const path = require('path');
+require('dotenv').config();
+
+const allowedOrigins = process.env.ALLOWED_ORIGIN.split(',');
 
 const app = express();
 const PORT = 3001;
 
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
 app.use(express.json());
 
 // ========== MEDIA EXTRACTION ==========

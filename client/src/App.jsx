@@ -7,12 +7,13 @@ function App() {
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(false);
   const [downloadingZip, setDownloadingZip] = useState(false);
+  const BACKEND = import.meta.env.VITE_BACKEND_URL;
 
   const handleExtract = async () => {
     if (!url) return alert('Please enter a URL');
     try {
       setLoading(true);
-      const res = await axios.post('http://localhost:3001/api/extract', { url });
+      const res = await axios.post(BACKEND + '/api/extract', { url });
       setMedia(res.data.media);
     } catch (err) {
       alert('Failed to fetch media');
@@ -27,7 +28,8 @@ function App() {
     try {
       setDownloadingZip(true);
       const res = await axios.post(
-        'http://localhost:3001/api/download-zip',
+        BACKEND +
+        '/api/download-zip',
         { media },
         { responseType: 'blob' }
       );
