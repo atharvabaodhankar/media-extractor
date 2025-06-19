@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import axios from 'axios';
+import fileDownload from 'js-file-download';
 
 function App() {
   const [url, setUrl] = useState('');
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [downloadingZip, setDownloadingZip] = useState(false);
 
   const handleExtract = async () => {
     if (!url) return alert('Please enter a URL');
@@ -17,6 +19,24 @@ function App() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleZipDownload = async () => {
+    if (!media.length) return;
+    try {
+      setDownloadingZip(true);
+      const res = await axios.post(
+        'http://localhost:3001/api/download-zip',
+        { media },
+        { responseType: 'blob' }
+      );
+      fileDownload(res.data, 'media.zip');
+    } catch (err) {
+      alert('Zip download failed');
+      console.error(err);
+    } finally {
+      setDownloadingZip(false);
     }
   };
 
@@ -44,7 +64,20 @@ function App() {
 
         {media.length > 0 && (
           <>
-            <h2 className="text-xl font-semibold mb-4">Found {media.length} media file(s):</h2>
+            <div className="my-4 text-right">
+              <button
+                onClick={handleZipDownload}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                disabled={downloadingZip}
+              >
+                {downloadingZip ? 'Creating ZIP...' : '⬇️ Download All as .zip'}
+              </button>
+            </div>
+
+            <h2 className="text-xl font-semibold mb-4">
+              Found {media.length} media file{media.length !== 1 && 's'}:
+            </h2>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {media.map((item, i) => (
                 <div key={i} className="border rounded-lg overflow-hidden shadow bg-white">
