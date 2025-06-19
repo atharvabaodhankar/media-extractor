@@ -14,14 +14,19 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // allow Postman, curl etc.
+  
+      const cleanOrigins = allowedOrigins.map(o => o.trim());
+  
+      if (cleanOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     }
-  }
-}));
+  }));
+  
 app.use(express.json());
 
 // ========== MEDIA EXTRACTION ==========
